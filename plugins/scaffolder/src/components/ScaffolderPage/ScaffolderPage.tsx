@@ -26,6 +26,7 @@ import {
   Progress,
   SupportButton,
   useApi,
+  useRouteRef,
   WarningPanel,
 } from '@backstage/core';
 import { useStarredEntities } from '@backstage/plugin-catalog-react';
@@ -38,7 +39,8 @@ import { ResultsFilter } from '../ResultsFilter/ResultsFilter';
 import { ScaffolderFilter } from '../ScaffolderFilter';
 import { ButtonGroup } from '../ScaffolderFilter/ScaffolderFilter';
 import SearchToolbar from '../SearchToolbar/SearchToolbar';
-import { TemplateCard, TemplateCardProps } from '../TemplateCard';
+import { TemplateCard } from '../TemplateCard';
+import { registerComponentRouteRef } from '../../routes';
 
 const useStyles = makeStyles(theme => ({
   contentWrapper: {
@@ -48,19 +50,6 @@ const useStyles = makeStyles(theme => ({
     gridColumnGap: theme.spacing(2),
   },
 }));
-
-const getTemplateCardProps = (
-  template: TemplateEntityV1alpha1,
-): TemplateCardProps & { key: string } => {
-  return {
-    key: template.metadata.uid!,
-    name: template.metadata.name,
-    title: `${(template.metadata.title || template.metadata.name) ?? ''}`,
-    type: template.spec.type ?? '',
-    description: template.metadata.description ?? '-',
-    tags: (template.metadata?.tags as string[]) ?? [],
-  };
-};
 
 export const ScaffolderPageContents = () => {
   const styles = useStyles();
@@ -108,6 +97,8 @@ export const ScaffolderPageContents = () => {
     `${metadata.title}`.toLocaleUpperCase('en-US').includes(query) ||
     metadata.tags?.join('').toLocaleUpperCase('en-US').indexOf(query) !== -1;
 
+  const registerComponentLink = useRouteRef(registerComponentRouteRef);
+
   useEffect(() => {
     if (search.length === 0) {
       return setMatchingEntities(filteredEntities);
@@ -132,14 +123,16 @@ export const ScaffolderPageContents = () => {
       />
       <Content>
         <ContentHeader title="Available Templates">
-          <Button
-            variant="contained"
-            color="primary"
-            component={RouterLink}
-            to="/catalog-import"
-          >
-            Register Existing Component
-          </Button>
+          {registerComponentLink && (
+            <Button
+              component={RouterLink}
+              variant="contained"
+              color="primary"
+              to={registerComponentLink()}
+            >
+              Register Existing Component
+            </Button>
+          )}
           <SupportButton>
             Create new software components using standard templates. Different
             templates create different kinds of components (services, websites,
@@ -182,7 +175,7 @@ export const ScaffolderPageContents = () => {
               {matchingEntities &&
                 matchingEntities?.length > 0 &&
                 matchingEntities.map(template => (
-                  <TemplateCard {...getTemplateCardProps(template)} />
+                  <TemplateCard template={template} />
                 ))}
             </ItemCardGrid>
           </div>

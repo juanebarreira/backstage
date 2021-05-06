@@ -29,6 +29,7 @@ export function registerCommands(program: CommanderStatic) {
     .command('app:build')
     .description('Build an app for a production release')
     .option('--stats', 'Write bundle stats to output directory')
+    .option('--lax', 'Do not require environment variables to be set')
     .option(...configOption)
     .action(lazy(() => import('./app/build').then(m => m.default)));
 
@@ -139,6 +140,15 @@ export function registerCommands(program: CommanderStatic) {
     .helpOption(', --backstage-cli-help') // Let Jest handle help
     .description('Run tests, forwarding args to Jest, defaulting to watch mode')
     .action(lazy(() => import('./testCommand').then(m => m.default)));
+
+  program
+    .command('config:docs')
+    .option(
+      '--package <name>',
+      'Only include the schema that applies to the given package',
+    )
+    .description('Browse the configuration reference documentation')
+    .action(lazy(() => import('./config/docs').then(m => m.default)));
 
   program
     .command('config:print')

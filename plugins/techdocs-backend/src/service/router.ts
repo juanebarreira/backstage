@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 import { PluginEndpointDiscovery } from '@backstage/backend-common';
-import { Entity } from '@backstage/catalog-model';
+import { Entity, stringifyEntityRef } from '@backstage/catalog-model';
 import { Config } from '@backstage/config';
+import { NotFoundError } from '@backstage/errors';
 import {
   GeneratorBuilder,
   getLocationForEntity,
@@ -23,15 +24,12 @@ import {
   PublisherBase,
 } from '@backstage/techdocs-common';
 import fetch from 'cross-fetch';
-import Docker from 'dockerode';
 import express from 'express';
 import Router from 'express-promise-router';
 import { Knex } from 'knex';
 import { Logger } from 'winston';
 import { DocsBuilder } from '../DocsBuilder';
 import { shouldCheckForUpdate } from '../DocsBuilder/BuildMetadataStorage';
-import { getEntityNameFromUrlPath } from './helpers';
-import { NotFoundError } from '@backstage/errors';
 
 type RouterOptions = {
   preparers: PreparerBuilder;
@@ -41,7 +39,6 @@ type RouterOptions = {
   discovery: PluginEndpointDiscovery;
   database?: Knex; // TODO: Make database required when we're implementing database stuff.
   config: Config;
-  dockerClient: Docker;
 };
 
 export async function createRouter({
@@ -49,16 +46,14 @@ export async function createRouter({
   generators,
   publisher,
   config,
-  dockerClient,
   logger,
   discovery,
 }: RouterOptions): Promise<express.Router> {
   const router = Router();
 
-  router.get('/metadata/techdocs/*', async (req, res) => {
-    // path is `:namespace/:kind:/:name`
-    const { '0': path } = req.params;
-    const entityName = getEntityNameFromUrlPath(path);
+  router.get('/metadata/techdocs/:namespace/:kind/:name', async (req, res) => {
+    const { kind, namespace, name } = req.params;
+    const entityName = { kind, namespace, name };
 
     try {
       const techdocsMetadata = await publisher.fetchTechDocsMetadata(
@@ -67,14 +62,15 @@ export async function createRouter({
 
       res.json(techdocsMetadata);
     } catch (err) {
-      logger.error(
-        `Unable to get metadata for ${entityName.namespace}/${entityName.name} with error ${err}`,
+      logger.info(
+        `Unable to get metadata for '${stringifyEntityRef(
+          entityName,
+        )}' with error ${err}`,
       );
-      res
-        .status(500)
-        .send(
-          `Unable to get metadata for $${entityName.namespace}/${entityName.name}, reason: ${err}`,
-        );
+      throw new NotFoundError(
+        `Unable to get metadata for '${stringifyEntityRef(entityName)}'`,
+        err,
+      );
     }
   });
 
@@ -82,9 +78,11 @@ export async function createRouter({
     const catalogUrl = await discovery.getBaseUrl('catalog');
 
     const { kind, namespace, name } = req.params;
+    const entityName = { kind, namespace, name };
 
     try {
       const token = getBearerToken(req.headers.authorization);
+      // TODO: Consider using the catalog client here
       const entity = (await (
         await fetch(
           `${catalogUrl}/entities/by-name/${kind}/${namespace}/${name}`,
@@ -98,10 +96,13 @@ export async function createRouter({
       res.json({ ...entity, locationMetadata });
     } catch (err) {
       logger.info(
-        `Unable to get metadata for ${kind}/${namespace}/${name} with error ${err}`,
+        `Unable to get metadata for '${stringifyEntityRef(
+          entityName,
+        )}' with error ${err}`,
       );
-      throw new Error(
-        `Unable to get metadata for ${kind}/${namespace}/${name} with error ${err}`,
+      throw new NotFoundError(
+        `Unable to get metadata for '${stringifyEntityRef(entityName)}'`,
+        err,
       );
     }
   });
@@ -161,7 +162,6 @@ export async function createRouter({
       preparers,
       generators,
       publisher,
-      dockerClient,
       logger,
       entity,
     });

@@ -1,5 +1,53 @@
 # @backstage/core
 
+## 0.7.7
+
+### Patch Changes
+
+- 9afcac5af: Allow passing NavLinkProps to SidebarItem component to use in NavLink
+- e0c9ed759: Add `if` prop to `EntityLayout.Route` to conditionally render tabs
+- 6eaecbd81: Improve owner example value in `MissingAnnotationEmptyState`.
+
+## 0.7.6
+
+### Patch Changes
+
+- 94da20976: Sort the table filter options by name.
+- d8cc7e67a: Exposing Material UI extension point for tabs to be able to add additional information to them
+- 99fbef232: Adding Headings for Accessibility on the Scaffolder Plugin
+- ab07d77f6: Add support for discovering plugins through the app element tree, removing the need to register them explicitly.
+- 937ed39ce: Exported SignInProviderConfig to strongly type SignInPage providers
+- 9a9e7a42f: Adding close button on support menu
+- 50ce875a0: Fixed a potentially confusing error being thrown about misuse of routable extensions where the error was actually something different.
+- Updated dependencies [ab07d77f6]
+- Updated dependencies [931b21a12]
+- Updated dependencies [50ce875a0]
+  - @backstage/core-api@0.2.17
+  - @backstage/theme@0.2.6
+
+## 0.7.5
+
+### Patch Changes
+
+- d0d1c2f7b: Pass `inverse` prop to Gauge from GaugeCard
+- 5cafcf452: add debounce time attribute for apis-docs for search, giving more time to the users when they are typing.
+- 86a95ba67: exposes undocumented `PageTheme`
+- e27cb6c45: Don't use a drag & drop cursor when clicking on disabled `IconLinkVertical`.
+
+## 0.7.4
+
+### Patch Changes
+
+- 1279a3325: Introduce a `load-chunk` step in the `BootErrorPage` to show make chunk loading
+  errors visible to the user.
+- 4a4681b1b: Improved error messaging for routable extension errors, making it easier to identify the component and mount point that caused the error.
+- b051e770c: Fixed a bug with `useRouteRef` where navigating from routes beneath a mount point would often fail.
+- 98dd5da71: Add support for multiple links to post-scaffold task summary page
+- Updated dependencies [1279a3325]
+- Updated dependencies [4a4681b1b]
+- Updated dependencies [b051e770c]
+  - @backstage/core-api@0.2.16
+
 ## 0.7.3
 
 ### Patch Changes

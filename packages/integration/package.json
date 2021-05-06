@@ -32,14 +32,14 @@
     "@backstage/config": "^0.1.2",
     "cross-fetch": "^3.0.6",
     "git-url-parse": "^11.4.4",
-    "@octokit/rest": "^18.0.12",
-    "@octokit/auth-app": "^2.10.5",
+    "@octokit/rest": "^18.5.3",
+    "@octokit/auth-app": "^3.4.0",
     "luxon": "^1.25.0"
   },
   "devDependencies": {
-    "@backstage/cli": "^0.6.4",
-    "@backstage/config-loader": "^0.5.1",
-    "@backstage/test-utils": "^0.1.7",
+    "@backstage/cli": "^0.6.7",
+    "@backstage/config-loader": "^0.6.0",
+    "@backstage/test-utils": "^0.1.10",
     "@types/jest": "^26.0.7",
     "@types/luxon": "^1.25.0",
     "msw": "^0.21.2"

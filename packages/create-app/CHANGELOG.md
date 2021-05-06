@@ -1,5 +1,430 @@
 # @backstage/create-app
 
+## 0.3.20
+
+### Patch Changes
+
+- 73f3f5d78: Updates the end to end test in the app to match the new catalog index page title. To apply this change to an existing app, update `packages/app/cypress/integration/app.js` to search for `"My Company Catalog"` instead of `"My Company Service Catalog"`.
+- Updated dependencies [1ce80ff02]
+- Updated dependencies [4c42ecca2]
+- Updated dependencies [c614ede9a]
+- Updated dependencies [9afcac5af]
+- Updated dependencies [07a7806c3]
+- Updated dependencies [f6efa71ee]
+- Updated dependencies [19a4dd710]
+- Updated dependencies [a99e0bc42]
+- Updated dependencies [dcd54c7cd]
+- Updated dependencies [da546ce00]
+- Updated dependencies [e0c9ed759]
+- Updated dependencies [6fbd7beca]
+- Updated dependencies [15cbe6815]
+- Updated dependencies [39bdaa004]
+- Updated dependencies [cb8c848a3]
+- Updated dependencies [21fddf452]
+- Updated dependencies [17915e29b]
+- Updated dependencies [a1783f306]
+- Updated dependencies [6eaecbd81]
+- Updated dependencies [23769512a]
+- Updated dependencies [1a142ae8a]
+  - @backstage/plugin-api-docs@0.4.12
+  - @backstage/plugin-github-actions@0.4.4
+  - @backstage/plugin-catalog-import@0.5.4
+  - @backstage/plugin-explore@0.3.4
+  - @backstage/plugin-lighthouse@0.2.15
+  - @backstage/core@0.7.7
+  - @backstage/plugin-scaffolder@0.9.2
+  - @backstage/plugin-catalog@0.5.6
+  - @backstage/plugin-catalog-backend@0.8.1
+  - @backstage/plugin-search@0.3.5
+  - @backstage/plugin-techdocs@0.9.0
+  - @backstage/plugin-scaffolder-backend@0.10.1
+
+## 0.3.19
+
+### Patch Changes
+
+- ee22773e9: Removed `plugins.ts` from the app, as plugins are now discovered through the react tree.
+
+  To apply this change to an existing app, simply delete `packages/app/src/plugins.ts` along with the import and usage in `packages/app/src/App.tsx`.
+
+  Note that there are a few plugins that require explicit registration, in which case you would need to keep them in `plugins.ts`. The set of plugins that need explicit registration is any plugin that doesn't have a component extension that gets rendered as part of the app element tree. An example of such a plugin in the main Backstage repo is `@backstage/plugin-badges`. In the case of the badges plugin this is because there is not yet a component-based API for adding context menu items to the entity layout.
+
+  If you have plugins that still rely on route registration through the `register` method of `createPlugin`, these need to be kept in `plugins.ts` as well. However, it is recommended to migrate these to export an extensions component instead.
+
+- 670acd88e: Fix system diagram card to be on the system page
+
+  To apply the same fix to an existing application, in `EntityPage.tsx` simply move the `<EntityLayout.route>` for the `/diagram` path from the `groupPage` down into the `systemPage` element.
+
+- Updated dependencies [94da20976]
+- Updated dependencies [84c54474d]
+- Updated dependencies [d8cc7e67a]
+- Updated dependencies [4e5c94249]
+- Updated dependencies [99fbef232]
+- Updated dependencies [cb0206b2b]
+- Updated dependencies [1373f4f12]
+- Updated dependencies [29a7e4be8]
+- Updated dependencies [ab07d77f6]
+- Updated dependencies [49574a8a3]
+- Updated dependencies [d367f63b5]
+- Updated dependencies [96728a2af]
+- Updated dependencies [5fe62f124]
+- Updated dependencies [931b21a12]
+- Updated dependencies [937ed39ce]
+- Updated dependencies [87c4f59de]
+- Updated dependencies [09b5fcf2e]
+- Updated dependencies [b42531cfe]
+- Updated dependencies [c2306f898]
+- Updated dependencies [9a9e7a42f]
+- Updated dependencies [50ce875a0]
+- Updated dependencies [ac6025f63]
+- Updated dependencies [e292e393f]
+- Updated dependencies [479b29124]
+  - @backstage/core@0.7.6
+  - @backstage/plugin-scaffolder-backend@0.10.0
+  - @backstage/cli@0.6.9
+  - @backstage/plugin-scaffolder@0.9.1
+  - @backstage/plugin-catalog-import@0.5.3
+  - @backstage/plugin-rollbar-backend@0.1.9
+  - @backstage/backend-common@0.6.3
+  - @backstage/plugin-catalog@0.5.5
+  - @backstage/plugin-catalog-backend@0.8.0
+  - @backstage/theme@0.2.6
+  - @backstage/plugin-techdocs@0.8.0
+
+## 0.3.18
+
+### Patch Changes
+
+- b49a525ab: Fixing dependency resolution for problematic library `graphql-language-service-interface`.
+
+  This change might not have to be applied to your local installation, however if you run into this error:
+
+  ```
+  Error: Failed to compile.
+  /tmp/backstage-e2e-uMeycm/test-app/node_modules/graphql-language-service-interface/esm/GraphQLLanguageService.js 100:23
+  Module parse failed: Unexpected token (100:23)
+  You may need an appropriate loader to handle this file type, currently no loaders are configured to process this file. See https://webpack.js.org/concepts#loaders
+  |         }
+  |         let customRules = null;
+  >         if (extensions?.customValidationRules &&
+  |             typeof extensions.customValidationRules === 'function') {
+  |             customRules = extensions.customValidationRules(this._graphQLConfig);
+  ```
+
+  You can fix it by adding the following to the root `package.json`.
+
+  ```json
+  ...
+  "resolutions": {
+    "graphql-language-service-interface": "2.8.2",
+    "graphql-language-service-parser": "1.9.0"
+   },
+  ...
+  ```
+
+- a360f9478: Expose the catalog-import route as an external route from the scaffolder.
+
+  This will make it possible to hide the "Register Existing Component" button
+  when you for example are running backstage with `catalog.readonly=true`.
+
+  As a consequence of this change you need add a new binding to your createApp call to
+  keep the button visible. However, if you instead want to hide the button you can safely
+  ignore the following example.
+
+  To bind the external route from the catalog-import plugin to the scaffolder template
+  index page, make sure you have the appropriate imports and add the following
+  to the createApp call:
+
+  ```typescript
+  import { catalogImportPlugin } from '@backstage/plugin-catalog-import';
+
+  const app = createApp({
+    // ...
+    bindRoutes({ bind }) {
+      // ...
+      bind(scaffolderPlugin.externalRoutes, {
+        registerComponent: catalogImportPlugin.routes.importPage,
+      });
+    },
+  });
+  ```
+
+- f1952337c: Due to a change in the techdocs publishers, they don't check if they are able to reach e.g. the configured S3 bucket anymore.
+  This can be added again by the following change. Note that the backend process will no longer exit when it is not reachable but will only emit an error log message.
+  You should include the check when your backend to get early feedback about a potential misconfiguration:
+
+  ```diff
+    // packages/backend/src/plugins/techdocs.ts
+
+    export default async function createPlugin({
+      logger,
+      config,
+      discovery,
+      reader,
+    }: PluginEnvironment): Promise<Router> {
+      // ...
+
+      const publisher = await Publisher.fromConfig(config, {
+        logger,
+        discovery,
+      })
+
+  +   // checks if the publisher is working and logs the result
+  +   await publisher.getReadiness();
+
+      // Docker client (conditionally) used by the generators, based on techdocs.generators config.
+      const dockerClient = new Docker();
+
+      // ...
+  }
+  ```
+
+- Updated dependencies [d8ffec739]
+- Updated dependencies [7abec4dbc]
+- Updated dependencies [017192ee8]
+- Updated dependencies [a360f9478]
+- Updated dependencies [bb5055aee]
+- Updated dependencies [d840d30bc]
+- Updated dependencies [d0d1c2f7b]
+- Updated dependencies [5d0740563]
+- Updated dependencies [b25846562]
+- Updated dependencies [12390778e]
+- Updated dependencies [cba5944fc]
+- Updated dependencies [a376e3ee8]
+- Updated dependencies [fef852ecd]
+- Updated dependencies [18f7345a6]
+- Updated dependencies [5cafcf452]
+- Updated dependencies [423a514c3]
+- Updated dependencies [86a95ba67]
+- Updated dependencies [442f34b87]
+- Updated dependencies [e27cb6c45]
+- Updated dependencies [184b02bef]
+- Updated dependencies [0b7fd7a9d]
+- Updated dependencies [60ce64aa2]
+  - @backstage/plugin-scaffolder-backend@0.9.6
+  - @backstage/plugin-catalog-backend@0.7.1
+  - @backstage/plugin-scaffolder@0.9.0
+  - @backstage/catalog-model@0.7.7
+  - @backstage/core@0.7.5
+  - @backstage/plugin-catalog@0.5.4
+  - @backstage/plugin-api-docs@0.4.11
+  - @backstage/plugin-techdocs-backend@0.7.1
+  - @backstage/plugin-techdocs@0.7.2
+  - @backstage/catalog-client@0.3.10
+  - @backstage/plugin-tech-radar@0.3.9
+  - @backstage/cli@0.6.8
+
+## 0.3.17
+
+### Patch Changes
+
+- 3e7de08af: **Fully migrated the template to the new composability API**
+
+  The `create-app` template is now fully migrated to the new composability API, see [Composability System Migration Documentation](https://backstage.io/docs/plugins/composability) for explanations and more details. The final change which is now done was to migrate the `EntityPage` from being a component built on top of the `EntityPageLayout` and several more custom components, to an element tree built with `EntitySwitch` and `EntityLayout`.
+
+  To apply this change to an existing plugin, it is important that all plugins that you are using have already been migrated. In this case the most crucial piece is that no entity page cards of contents may require the `entity` prop, and they must instead consume the entity from context using `useEntity`.
+
+  Since this change is large with a lot of repeated changes, we'll describe a couple of common cases rather than the entire change. If your entity pages are unchanged from the `create-app` template, you can also just bring in the latest version directly from the [template itself](https://github.com/backstage/backstage/blob/master/packages/create-app/templates/default-app/packages/app/src/components/catalog/EntityPage.tsx).
+
+  The first step of the change is to change the `packages/app/src/components/catalog/EntityPage.tsx` export to `entityPage` rather than `EntityPage`. This will require an update to `App.tsx`, which is the only change we need to do outside of `EntityPage.tsx`:
+
+  ```diff
+  -import { EntityPage } from './components/catalog/EntityPage';
+  +import { entityPage } from './components/catalog/EntityPage';
+
+   <Route
+     path="/catalog/:namespace/:kind/:name"
+     element={<CatalogEntityPage />}
+   >
+  -  <EntityPage />
+  +  {entityPage}
+   </Route>
+  ```
+
+  The rest of the changes happen within `EntityPage.tsx`, and can be split into two broad categories, updating page components, and updating switch components.
+
+  #### Migrating Page Components
+
+  Let's start with an example of migrating a user page component. The following is the old code in the template:
+
+  ```tsx
+  const UserOverviewContent = ({ entity }: { entity: UserEntity }) => (
+    <Grid container spacing={3}>
+      <Grid item xs={12} md={6}>
+        <UserProfileCard entity={entity} variant="gridItem" />
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <OwnershipCard entity={entity} variant="gridItem" />
+      </Grid>
+    </Grid>
+  );
+
+  const UserEntityPage = ({ entity }: { entity: Entity }) => (
+    <EntityPageLayout>
+      <EntityPageLayout.Content
+        path="/*"
+        title="Overview"
+        element={<UserOverviewContent entity={entity as UserEntity} />}
+      />
+    </EntityPageLayout>
+  );
+  ```
+
+  There's the main `UserEntityPage` component, and the `UserOverviewContent` component. Let's start with migrating the page contents, which we do by rendering an element rather than creating a component, as well as replace the cards with their new composability compatible variants. The new cards and content components can be identified by the `Entity` prefix.
+
+  ```tsx
+  const userOverviewContent = (
+    <Grid container spacing={3}>
+      <Grid item xs={12} md={6}>
+        <EntityUserProfileCard variant="gridItem" />
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <EntityOwnershipCard variant="gridItem" />
+      </Grid>
+    </Grid>
+  );
+  ```
+
+  Now let's migrate the page component, again by converting it into a rendered element instead of a component, as well as replacing the use of `EntityPageLayout` with `EntityLayout`.
+
+  ```tsx
+  const userPage = (
+    <EntityLayout>
+      <EntityLayout.Route path="/" title="Overview">
+        {userOverviewContent}
+      </EntityLayout.Route>
+    </EntityLayout>
+  );
+  ```
+
+  At this point the `userPage` is quite small, so throughout this migration we have inlined the page contents for all pages. This is an optional step, but may help reduce noise. The final page now looks like this:
+
+  ```tsx
+  const userPage = (
+    <EntityLayout>
+      <EntityLayout.Route path="/" title="Overview">
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            <EntityUserProfileCard variant="gridItem" />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <EntityOwnershipCard variant="gridItem" />
+          </Grid>
+        </Grid>
+      </EntityLayout.Route>
+    </EntityLayout>
+  );
+  ```
+
+  #### Migrating Switch Components
+
+  Switch components were used to select what entity page components or cards to render, based on for example the kind of entity. For this example we'll focus on the root `EntityPage` switch component, but the process is the same for example for the CI/CD switcher.
+
+  The old `EntityPage` looked like this:
+
+  ```tsx
+  export const EntityPage = () => {
+    const { entity } = useEntity();
+
+    switch (entity?.kind?.toLocaleLowerCase('en-US')) {
+      case 'component':
+        return <ComponentEntityPage entity={entity} />;
+      case 'api':
+        return <ApiEntityPage entity={entity} />;
+      case 'group':
+        return <GroupEntityPage entity={entity} />;
+      case 'user':
+        return <UserEntityPage entity={entity} />;
+      case 'system':
+        return <SystemEntityPage entity={entity} />;
+      case 'domain':
+        return <DomainEntityPage entity={entity} />;
+      case 'location':
+      case 'resource':
+      case 'template':
+      default:
+        return <DefaultEntityPage entity={entity} />;
+    }
+  };
+  ```
+
+  In order to migrate to the composability API, we need to make this an element instead of a component, which means we're unable to keep the switch statement as is. To help with this, the catalog plugin provides an `EntitySwitch` component, which functions similar to a regular `switch` statement, which the first match being the one that is rendered. The catalog plugin also provides a number of built-in filter functions to use, such as `isKind` and `isComponentType`.
+
+  To migrate the `EntityPage`, we convert the `switch` statement into an `EntitySwitch` element, and each `case` statement into an `EntitySwitch.Case` element. We also move over to use our new element version of the page components, with the result looking like this:
+
+  ```tsx
+  export const entityPage = (
+    <EntitySwitch>
+      <EntitySwitch.Case if={isKind('component')} children={componentPage} />
+      <EntitySwitch.Case if={isKind('api')} children={apiPage} />
+      <EntitySwitch.Case if={isKind('group')} children={groupPage} />
+      <EntitySwitch.Case if={isKind('user')} children={userPage} />
+      <EntitySwitch.Case if={isKind('system')} children={systemPage} />
+      <EntitySwitch.Case if={isKind('domain')} children={domainPage} />
+
+      <EntitySwitch.Case>{defaultEntityPage}</EntitySwitch.Case>
+    </EntitySwitch>
+  );
+  ```
+
+  Another example is the `ComponentEntityPage`, which is migrated from this:
+
+  ```tsx
+  export const ComponentEntityPage = ({ entity }: { entity: Entity }) => {
+    switch (entity?.spec?.type) {
+      case 'service':
+        return <ServiceEntityPage entity={entity} />;
+      case 'website':
+        return <WebsiteEntityPage entity={entity} />;
+      default:
+        return <DefaultEntityPage entity={entity} />;
+    }
+  };
+  ```
+
+  To this:
+
+  ```tsx
+  const componentPage = (
+    <EntitySwitch>
+      <EntitySwitch.Case if={isComponentType('service')}>
+        {serviceEntityPage}
+      </EntitySwitch.Case>
+
+      <EntitySwitch.Case if={isComponentType('website')}>
+        {websiteEntityPage}
+      </EntitySwitch.Case>
+
+      <EntitySwitch.Case>{defaultEntityPage}</EntitySwitch.Case>
+    </EntitySwitch>
+  );
+  ```
+
+  Note that if you want to conditionally render some piece of content, you can omit the default `EntitySwitch.Case`. If no case is matched in an `EntitySwitch`, nothing will be rendered.
+
+- Updated dependencies [802b41b65]
+- Updated dependencies [2b2b31186]
+- Updated dependencies [1279a3325]
+- Updated dependencies [4a4681b1b]
+- Updated dependencies [97b60de98]
+- Updated dependencies [3f96a9d5a]
+- Updated dependencies [b051e770c]
+- Updated dependencies [f9c75f7a9]
+- Updated dependencies [ae6250ce3]
+- Updated dependencies [98dd5da71]
+- Updated dependencies [b779b5fee]
+  - @backstage/plugin-scaffolder-backend@0.9.5
+  - @backstage/plugin-auth-backend@0.3.8
+  - @backstage/core@0.7.4
+  - @backstage/catalog-model@0.7.6
+  - @backstage/plugin-scaffolder@0.8.2
+  - @backstage/plugin-catalog-import@0.5.2
+  - @backstage/test-utils@0.1.10
+  - @backstage/plugin-catalog@0.5.3
+  - @backstage/backend-common@0.6.2
+  - @backstage/cli@0.6.7
+  - @backstage/plugin-app-backend@0.3.11
+
 ## 0.3.16
 
 ### Patch Changes

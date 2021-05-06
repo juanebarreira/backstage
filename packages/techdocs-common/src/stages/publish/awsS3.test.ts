@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import { getVoidLogger } from '@backstage/backend-common';
 import {
   Entity,
   EntityName,
@@ -22,7 +24,6 @@ import { ConfigReader } from '@backstage/config';
 import mockFs from 'mock-fs';
 import os from 'os';
 import path from 'path';
-import * as winston from 'winston';
 import { AwsS3Publish } from './awsS3';
 import { PublisherBase, TechDocsMetadata } from './types';
 
@@ -59,9 +60,7 @@ const getEntityRootDir = (entity: Entity) => {
   return path.join(rootDir, namespace || ENTITY_DEFAULT_NAMESPACE, kind, name);
 };
 
-const logger = winston.createLogger();
-jest.spyOn(logger, 'info').mockReturnValue(logger);
-jest.spyOn(logger, 'error').mockReturnValue(logger);
+const logger = getVoidLogger();
 
 let publisher: PublisherBase;
 
@@ -87,6 +86,39 @@ beforeEach(() => {
 });
 
 describe('AwsS3Publish', () => {
+  describe('getReadiness', () => {
+    it('should validate correct config', async () => {
+      expect(await publisher.getReadiness()).toEqual({
+        isAvailable: true,
+      });
+    });
+
+    it('should reject incorrect config', async () => {
+      const mockConfig = new ConfigReader({
+        techdocs: {
+          requestUrl: 'http://localhost:7000',
+          publisher: {
+            type: 'awsS3',
+            awsS3: {
+              credentials: {
+                accessKeyId: 'accessKeyId',
+                secretAccessKey: 'secretAccessKey',
+              },
+              // this bucket name will throw an error
+              bucketName: 'errorBucket',
+            },
+          },
+        },
+      });
+
+      const errorPublisher = AwsS3Publish.fromConfig(mockConfig, logger);
+
+      expect(await errorPublisher.getReadiness()).toEqual({
+        isAvailable: false,
+      });
+    });
+  });
+
   describe('publish', () => {
     beforeEach(() => {
       const entity = createMockEntity();
@@ -123,7 +155,6 @@ describe('AwsS3Publish', () => {
     });
 
     it('should fail to publish a directory', async () => {
-      expect.assertions(3);
       const wrongPathToGeneratedDirectory = path.join(
         rootDir,
         'wrong',
@@ -140,23 +171,22 @@ describe('AwsS3Publish', () => {
         }),
       ).rejects.toThrowError();
 
-      await publisher
-        .publish({
-          entity,
-          directory: wrongPathToGeneratedDirectory,
-        })
-        .catch(error => {
-          expect(error.message).toEqual(
-            // Can not do exact error message match due to mockFs adding unexpected characters in the path when throwing the error
-            // Issue reported https://github.com/tschaub/mock-fs/issues/118
-            expect.stringContaining(
-              `Unable to upload file(s) to AWS S3. Error: Failed to read template directory: ENOENT, no such file or directory`,
-            ),
-          );
-          expect(error.message).toEqual(
-            expect.stringContaining(wrongPathToGeneratedDirectory),
-          );
-        });
+      const fails = publisher.publish({
+        entity,
+        directory: wrongPathToGeneratedDirectory,
+      });
+
+      // Can not do exact error message match due to mockFs adding unexpected characters in the path when throwing the error
+      // Issue reported https://github.com/tschaub/mock-fs/issues/118
+      await expect(fails).rejects.toMatchObject({
+        message: expect.stringContaining(
+          'Unable to upload file(s) to AWS S3. Error: Failed to read template directory: ENOENT, no such file or directory',
+        ),
+      });
+      await expect(fails).rejects.toMatchObject({
+        message: expect.stringContaining(wrongPathToGeneratedDirectory),
+      });
+
       mockFs.restore();
     });
   });
@@ -234,18 +264,12 @@ describe('AwsS3Publish', () => {
       const entity = createMockEntity();
       const entityRootDir = getEntityRootDir(entity);
 
-      await publisher
-        .fetchTechDocsMetadata(entityNameMock)
-        .catch(error =>
-          expect(error).toEqual(
-            new Error(
-              `TechDocs metadata fetch failed, The file ${path.join(
-                entityRootDir,
-                'techdocs_metadata.json',
-              )} does not exist !`,
-            ),
-          ),
-        );
+      const fails = publisher.fetchTechDocsMetadata(entityNameMock);
+
+      const errorPath = path.join(entityRootDir, 'techdocs_metadata.json');
+      await expect(fails).rejects.toMatchObject({
+        message: `TechDocs metadata fetch failed, The file ${errorPath} does not exist !`,
+      });
     });
   });
 });

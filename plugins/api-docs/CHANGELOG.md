@@ -1,5 +1,34 @@
 # @backstage/plugin-api-docs
 
+## 0.4.12
+
+### Patch Changes
+
+- 1ce80ff02: Resolve issues with AsyncAPI rendering by updating `@asyncapi/react-component`
+  to `0.23.0`. The theming of the component is adjusted to the latest styling
+  changes.
+- c614ede9a: Updated README to have up-to-date install instructions.
+- 07a7806c3: Added fields filtering in get API entities to avoid the requesting of unused data
+- Updated dependencies [9afcac5af]
+- Updated dependencies [e0c9ed759]
+- Updated dependencies [6eaecbd81]
+  - @backstage/core@0.7.7
+
+## 0.4.11
+
+### Patch Changes
+
+- 12390778e: chore(deps): bump @asyncapi/react-component from 0.19.2 to 0.22.3
+- 5cafcf452: add debounce time attribute for apis-docs for search, giving more time to the users when they are typing.
+- Updated dependencies [bb5055aee]
+- Updated dependencies [d0d1c2f7b]
+- Updated dependencies [5d0740563]
+- Updated dependencies [5cafcf452]
+- Updated dependencies [86a95ba67]
+- Updated dependencies [e27cb6c45]
+  - @backstage/catalog-model@0.7.7
+  - @backstage/core@0.7.5
+
 ## 0.4.10
 
 ### Patch Changes

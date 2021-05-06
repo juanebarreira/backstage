@@ -17,7 +17,10 @@
 import { Entity, EntityName, Location } from '@backstage/catalog-model';
 
 export type CatalogEntitiesRequest = {
-  filter?: Record<string, string | string[]> | undefined;
+  filter?:
+    | Record<string, string | string[]>[]
+    | Record<string, string | string[]>
+    | undefined;
   fields?: string[] | undefined;
 };
 
@@ -46,7 +49,7 @@ export interface CatalogApi {
 
   // Locations
   getLocationById(
-    id: String,
+    id: string,
     options?: CatalogRequestOptions,
   ): Promise<Location | undefined>;
   getOriginLocationByEntity(

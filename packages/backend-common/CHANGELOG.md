@@ -1,5 +1,21 @@
 # @backstage/backend-common
 
+## 0.6.3
+
+### Patch Changes
+
+- d367f63b5: remove use of deprecated type HelmetOptions
+- b42531cfe: Support configuration of file storage for SQLite databases. Every plugin has its
+  own database file at the specified path.
+
+## 0.6.2
+
+### Patch Changes
+
+- b779b5fee: Add UrlReader for Google Cloud Storage
+- Updated dependencies [82c66b8cd]
+  - @backstage/config-loader@0.6.0
+
 ## 0.6.1
 
 ### Patch Changes

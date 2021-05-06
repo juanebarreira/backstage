@@ -23,6 +23,9 @@ import { initRepoAndPush } from '../../../stages/publish/helpers';
 import { getRepoSourceDirectory, parseRepoUrl } from './util';
 import { createTemplateAction } from '../../createTemplateAction';
 
+type Permission = 'pull' | 'push' | 'admin' | 'maintain' | 'triage';
+type Collaborator = { access: Permission; username: string };
+
 export function createPublishGithubAction(options: {
   integrations: ScmIntegrationRegistry;
 }) {
@@ -41,6 +44,7 @@ export function createPublishGithubAction(options: {
     access?: string;
     sourcePath?: string;
     repoVisibility: 'private' | 'internal' | 'public';
+    collaborators: Collaborator[];
   }>({
     id: 'publish:github',
     description:
@@ -63,14 +67,34 @@ export function createPublishGithubAction(options: {
             type: 'string',
           },
           repoVisibility: {
-            title: 'Repository Visiblity',
+            title: 'Repository Visibility',
             type: 'string',
             enum: ['private', 'public', 'internal'],
           },
           sourcePath: {
             title:
-              'Path within the workspace that will be used as the repository root. If omitted, the entire workspace will be published as the respository.',
+              'Path within the workspace that will be used as the repository root. If omitted, the entire workspace will be published as the repository.',
             type: 'string',
+          },
+          collaborators: {
+            title: 'Collaborators',
+            description: 'Provide users with permissions',
+            type: 'array',
+            items: {
+              type: 'object',
+              required: ['username', 'access'],
+              properties: {
+                access: {
+                  type: 'string',
+                  description: 'The type of access for the user',
+                  enum: ['push', 'pull', 'admin', 'maintain', 'triage'],
+                },
+                username: {
+                  type: 'string',
+                  description: 'The username or group',
+                },
+              },
+            },
           },
         },
       },
@@ -94,6 +118,7 @@ export function createPublishGithubAction(options: {
         description,
         access,
         repoVisibility = 'private',
+        collaborators,
       } = ctx.input;
 
       const { owner, repo, host } = parseRepoUrl(repoUrl);
@@ -124,6 +149,7 @@ export function createPublishGithubAction(options: {
       const client = new Octokit({
         auth: token,
         baseUrl: integrationConfig.config.apiBaseUrl,
+        previews: ['nebula-preview'],
       });
 
       const user = await client.users.getByUsername({
@@ -155,7 +181,7 @@ export function createPublishGithubAction(options: {
           repo,
           permission: 'admin',
         });
-        // no need to add access if it's the person who own's the personal account
+        // No need to add access if it's the person who owns the personal account
       } else if (access && access !== owner) {
         await client.repos.addCollaborator({
           owner,
@@ -163,6 +189,27 @@ export function createPublishGithubAction(options: {
           username: access,
           permission: 'admin',
         });
+      }
+
+      if (collaborators) {
+        for (const {
+          access: permission,
+          username: team_slug,
+        } of collaborators) {
+          try {
+            await client.teams.addOrUpdateRepoPermissionsInOrg({
+              org: owner,
+              team_slug,
+              owner,
+              repo,
+              permission,
+            });
+          } catch (e) {
+            ctx.logger.warn(
+              `Skipping ${permission} access for ${team_slug}, ${e.message}`,
+            );
+          }
+        }
       }
 
       const remoteUrl = data.clone_url;

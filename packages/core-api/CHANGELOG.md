@@ -1,5 +1,23 @@
 # @backstage/core-api
 
+## 0.2.17
+
+### Patch Changes
+
+- ab07d77f6: Add support for discovering plugins through the app element tree, removing the need to register them explicitly.
+- 50ce875a0: Fixed a potentially confusing error being thrown about misuse of routable extensions where the error was actually something different.
+- Updated dependencies [931b21a12]
+  - @backstage/theme@0.2.6
+
+## 0.2.16
+
+### Patch Changes
+
+- 1279a3325: Introduce a `load-chunk` step in the `BootErrorPage` to show make chunk loading
+  errors visible to the user.
+- 4a4681b1b: Improved error messaging for routable extension errors, making it easier to identify the component and mount point that caused the error.
+- b051e770c: Fixed a bug with `useRouteRef` where navigating from routes beneath a mount point would often fail.
+
 ## 0.2.15
 
 ### Patch Changes

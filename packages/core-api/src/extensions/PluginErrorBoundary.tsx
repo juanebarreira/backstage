@@ -29,7 +29,7 @@ type Props = {
 
 type State = { error?: Error };
 
-export class ErrorBoundary extends React.Component<Props, State> {
+export class PluginErrorBoundary extends React.Component<Props, State> {
   static getDerivedStateFromError(error: Error) {
     return { error };
   }

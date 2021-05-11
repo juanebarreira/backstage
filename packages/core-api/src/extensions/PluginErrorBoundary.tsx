@@ -18,7 +18,7 @@ import React from 'react';
 
 export type ErrorBoundaryFallbackProps = {
   error: Error;
-  resetErrorBoundary: () => void;
+  resetError: () => void;
 };
 
 type FallbackRender = React.FunctionComponent<ErrorBoundaryFallbackProps>;
@@ -36,7 +36,7 @@ export class PluginErrorBoundary extends React.Component<Props, State> {
 
   state: State = { error: undefined };
 
-  resetErrorBoundary = () => {
+  resetError = () => {
     this.setState({ error: undefined });
   };
 
@@ -47,7 +47,7 @@ export class PluginErrorBoundary extends React.Component<Props, State> {
     if (error) {
       return fallbackRender({
         error,
-        resetErrorBoundary: this.resetErrorBoundary,
+        resetError: this.resetError,
       });
     }
 

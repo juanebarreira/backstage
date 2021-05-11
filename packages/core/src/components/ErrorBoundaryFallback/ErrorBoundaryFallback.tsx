@@ -23,7 +23,7 @@ import { Button } from '@material-ui/core';
 
 export const ErrorBoundaryFallback: AppComponents['ErrorBoundaryFallback'] = ({
   error,
-  resetErrorBoundary,
+  resetError,
   plugin,
 }) => {
   return (
@@ -32,7 +32,7 @@ export const ErrorBoundaryFallback: AppComponents['ErrorBoundaryFallback'] = ({
       defaultExpanded
       error={error}
       actions={
-        <Button variant="outlined" onClick={resetErrorBoundary}>
+        <Button variant="outlined" onClick={resetError}>
           Retry
         </Button>
       }

@@ -131,11 +131,11 @@ export function createReactExtension<
         return (
           <Suspense fallback="...">
             <PluginErrorBoundary
-              fallbackRender={({ error, resetErrorBoundary }) => {
+              fallbackRender={({ error, resetError }) => {
                 return (
                   <ErrorBoundaryFallback
                     error={error}
-                    resetErrorBoundary={resetErrorBoundary}
+                    resetError={resetError}
                     plugin={plugin}
                   />
                 );

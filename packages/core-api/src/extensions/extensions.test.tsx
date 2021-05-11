@@ -31,6 +31,7 @@ import {
 } from './extensions';
 import { AppComponents } from '../app/types';
 import { AppContext } from '../app';
+import { MockErrorApi } from '@backstage/test-utils';
 
 const plugin = createPlugin({
   id: 'my-plugin',
@@ -93,10 +94,7 @@ describe('extensions', () => {
 
     const BrokenComponent = plugin.provide(extension);
 
-    const errorApi: jest.Mocked<typeof errorApiRef.T> = {
-      post: jest.fn(),
-      error$: jest.fn(),
-    };
+    const errorApi = new MockErrorApi();
 
     const apis = ApiRegistry.from([[errorApiRef, errorApi]]);
 

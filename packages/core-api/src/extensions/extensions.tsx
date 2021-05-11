@@ -19,7 +19,7 @@ import { useApp } from '../app';
 import { BackstagePlugin, Extension } from '../plugin/types';
 import { RouteRef, useRouteRef } from '../routing';
 import { attachComponentData } from './componentData';
-import { ErrorBoundary } from './ErrorBoundary';
+import { PluginErrorBoundary } from './PluginErrorBoundary';
 
 type ComponentLoader<T> =
   | {
@@ -130,7 +130,7 @@ export function createReactExtension<
 
         return (
           <Suspense fallback="...">
-            <ErrorBoundary
+            <PluginErrorBoundary
               fallbackRender={({ error, resetErrorBoundary }) => {
                 return (
                   <ErrorBoundaryFallback
@@ -142,7 +142,7 @@ export function createReactExtension<
               }}
             >
               <Component {...props} />
-            </ErrorBoundary>
+            </PluginErrorBoundary>
           </Suspense>
         );
       };

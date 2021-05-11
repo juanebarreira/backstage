@@ -22,7 +22,7 @@ import { AnyApiFactory } from '../apis';
 import { AppTheme, ProfileInfo } from '../apis/definitions';
 import { AppConfig } from '@backstage/config';
 import { SubRouteRef } from '../routing/types';
-import type { ErrorBoundaryFallbackProps } from '../extensions/ErrorBoundary';
+import type { ErrorBoundaryFallbackProps } from '../extensions/PluginErrorBoundary';
 
 export type BootErrorPageProps = {
   step: 'load-config' | 'load-chunk';

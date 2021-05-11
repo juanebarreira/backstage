@@ -1,5 +1,14 @@
 # @backstage/techdocs-common
 
+## 0.6.1
+
+### Patch Changes
+
+- e04f1ccfb: Fixed a bug that prevented loading static assets from GCS, S3, Azure, and OpenStackSwift whose keys contain spaces or other special characters.
+- Updated dependencies [10c008a3a]
+- Updated dependencies [16be1d093]
+  - @backstage/catalog-model@0.7.9
+
 ## 0.6.0
 
 ### Minor Changes

@@ -1,6 +1,6 @@
 ---
 '@backstage/core': minor
-'@backstage/core-api': minor
+'@backstage/core-api': patch
 ---
 
 This change adds error boundary on extensions.

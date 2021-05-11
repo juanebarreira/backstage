@@ -156,16 +156,12 @@ function withRoutingProvider(
   );
 }
 
+const appContext = ({ getComponents: () => ({}) } as unknown) as AppContext;
+
 describe('discovery', () => {
   it('should handle simple routeRef path creation for routeRefs used in other parts of the app', async () => {
     const root = (
-      <AppContextProvider
-        appContext={
-          ({
-            getComponents: () => ({}),
-          } as unknown) as AppContext
-        }
-      >
+      <AppContextProvider appContext={appContext}>
         <MemoryRouter initialEntries={['/foo/bar']}>
           <Routes>
             <Extension1 path="/foo">
@@ -215,13 +211,7 @@ describe('discovery', () => {
 
   it('should handle routeRefs with parameters', async () => {
     const root = (
-      <AppContextProvider
-        appContext={
-          ({
-            getComponents: () => ({}),
-          } as unknown) as AppContext
-        }
-      >
+      <AppContextProvider appContext={appContext}>
         <MemoryRouter initialEntries={['/foo/bar/wat']}>
           <Routes>
             <Extension1 path="/foo">
@@ -254,13 +244,7 @@ describe('discovery', () => {
 
   it('should handle relative routing within parameterized routePaths', async () => {
     const root = (
-      <AppContextProvider
-        appContext={
-          ({
-            getComponents: () => ({}),
-          } as unknown) as AppContext
-        }
-      >
+      <AppContextProvider appContext={appContext}>
         <MemoryRouter initialEntries={['/foo/blob/baz']}>
           <React.Suspense fallback="loller">
             <Routes>
@@ -289,13 +273,7 @@ describe('discovery', () => {
 
   it('should throw errors for routing to other routeRefs with unsupported parameters', () => {
     const root = (
-      <AppContextProvider
-        appContext={
-          ({
-            getComponents: () => ({}),
-          } as unknown) as AppContext
-        }
-      >
+      <AppContextProvider appContext={appContext}>
         <MemoryRouter initialEntries={['/']}>
           <Routes>
             <Extension5 path="/foo/:id">
@@ -329,13 +307,7 @@ describe('discovery', () => {
 
   it('should handle relative routing of parameterized routePaths with duplicate param names', () => {
     const root = (
-      <AppContextProvider
-        appContext={
-          ({
-            getComponents: () => ({}),
-          } as unknown) as AppContext
-        }
-      >
+      <AppContextProvider appContext={appContext}>
         <MemoryRouter>
           <Routes>
             <Extension5 path="/foo/:id">

@@ -4,7 +4,7 @@ metadata:
   name: artist-lookup
   description: Artist Lookup
   annotations:
-    github.com/project-slug: 'sparkfabrik/cmsantagostino-component-test'
+    github.com/project-slug: 'backstage/backstage'
   tags:
     - java
     - data
